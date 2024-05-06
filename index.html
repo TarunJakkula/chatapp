@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .flex {
+        display: flex;
+      }
+      .justify-start {
+        justify-content: left;
+      }
+      .justify-end {
+        justify-content: right;
+      }
+      .justify-evenly {
+        justify-content: space-evenly;
+      }
+      .justify-center {
+        justify-content: center;
+      }
+      .gap-20 {
+        gap: 20px;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+      }
+      .window {
+        width: 100vw;
+        height: 100vh;
+        background-color: #121212;
+        display: flex;
+        justify-content: space-evenly;
+        flex-direction: column;
+        align-items: center;
+      }
+      .chat-window {
+        width: calc(80% - 50px);
+        height: calc(80% - 50px);
+        background-color: #212121;
+        border-radius: 10px;
+        padding: 50px 50px;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        scrollbar-width: 10px;
+        scrollbar-color: #212121 #121212;
+      }
+      .stats {
+        text-align: center;
+        width: 100%;
+        background-color: #121212;
+        color: white;
+        border-radius: 10px;
+        padding: 10px 0px;
+        letter-spacing: -0.05em;
+        font-size: 1.2em;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+      .otherMsg {
+        text-align: left;
+        min-width: 20%;
+        max-width: 40%;
+        width: fit-content;
+        text-wrap: wrap;
+        word-wrap: break-word;
+        background-color: cornflowerblue;
+        padding: 20px 20px;
+        border-radius: 0px 20px 20px 20px;
+        letter-spacing: -0.05em;
+        font-size: 1.2em;
+        font-weight: 600;
+      }
+      .yourMsg {
+        text-align: left;
+        min-width: 20%;
+        max-width: 40%;
+        width: fit-content;
+        text-wrap: wrap;
+        word-wrap: break-word;
+        background-color: aquamarine;
+        padding: 20px 20px;
+        border-radius: 20px 0px 20px 20px;
+        letter-spacing: -0.05em;
+        font-size: 1.2em;
+        font-weight: 600;
+      }
+      .chat-input {
+        width: 60%;
+        background-color: #121212;
+        border-radius: 10px;
+        border-color: white;
+        border-width: 1px;
+        color: white;
+        padding: 15px 15px;
+        border-style: solid;
+        letter-spacing: -0.05em;
+        font-size: 1.2em;
+      }
+      .inputDiv {
+        width: 80%;
+      }
+      .sendBtn {
+        width: 10%;
+        border-radius: 10px;
+        background-color: #121212;
+        border-radius: 10px;
+        border-style: solid;
+        border-width: 1px;
+        color: white;
+        border-color: white;
+        cursor: pointer;
+        font-weight: 900;
+        letter-spacing: -0.05em;
+        font-size: 1.2em;
+      }
+      .bar {
+        width: 2px;
+        height: 100%;
+        background-color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="window">
+      <div id="messages" class="chat-window">
+        <div class="stats" id="stats">0 online except you</div>
+      </div>
+      <div class="flex gap-20 inputDiv justify-center">
+        <input type="text" id="msg" class="chat-input" />
+        <div class="bar"></div>
+        <button id="submit" onclick="handleSubmit()" class="sendBtn">
+          Send
+        </button>
+      </div>
+    </div>
+  </body>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    let socket = io();
+    const name = prompt("Whats your name:");
+    socket.on("connect", () => {
+      console.log("Connected to server");
+    });
+    socket.on("numOfUsers", (num) => {
+      const stats = document.getElementById("stats");
+      stats.innerHTML = num + " online except you";
+    });
+    socket.on("stream", ({ name, msg }) => {
+      const list = document.getElementById("messages");
+      list.innerHTML += `<div class="flex justify-start"><span class="otherMsg">${
+        name + ":" + msg
+      }</span></div>
+      <br />`;
+    });
+    const handleSubmit = () => {
+      const element = document.getElementById("msg");
+      const msg = element.value;
+      if (msg.length > 0) {
+        const list = document.getElementById("messages");
+        list.innerHTML += `<div class="flex justify-end"><span class="yourMsg">
+            ${name + ":" + msg}
+      </span></div>
+      <br />`;
+        socket.emit("sendMessage", { name: name, msg: msg });
+        element.value = "";
+      }
+    };
+  </script>
+</html>
